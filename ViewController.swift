@@ -18,26 +18,26 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         dismiss(animated: true, completion: nil)
         bottom.isHidden = false
         top.isHidden = false
-        bottom.textAlignment = .center
-        top.textAlignment = .center
     }
-
-
-    @IBAction func camera(_ sender: Any) {
+    
+    // per reviewer sugggestion creating funtion to configure and present image picker
+    func presentImagePickerWith(sourceType: UIImagePickerControllerSourceType) {
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
-        pickerController.sourceType = .camera
+        pickerController.sourceType = sourceType
         present(pickerController, animated: true, completion: nil)
     }
-
+    
+    @IBAction func camera(_ sender: Any) {
+        presentImagePickerWith(sourceType: .camera)
+    }
 
     @IBAction func addImage(_ sender: Any) {
-        let pickerController = UIImagePickerController()
-        pickerController.delegate = self
-        pickerController.sourceType = .photoLibrary
-        present(pickerController, animated: true, completion: nil)
+        presentImagePickerWith(sourceType: .photoLibrary)
     }
 
+    
+    
     @IBOutlet weak var bottom: UITextField!
     @IBOutlet weak var top: UITextField!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
@@ -45,19 +45,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var navBar: UINavigationBar!
     
+    // per reviewer sugggestion creating funtion to configure text fields
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    func configure (textField: UITextField, text: String, defaultAttributes: [String:Any]) {
         
-        bottom.isHidden = true
-        top.isHidden = true
         bottom.defaultTextAttributes = memeTextAttributes
         top.defaultTextAttributes = memeTextAttributes
         bottom.backgroundColor = UIColor.clear
         top.backgroundColor = UIColor.clear
+        bottom.isHidden = true
+        top.isHidden = true
+        bottom.textAlignment = .center
+        top.textAlignment = .center
+        
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
         shareButton.isEnabled = false
- 
+        configure(textField: top, text: "Top", defaultAttributes: memeTextAttributes)
+        configure(textField: bottom, text: "Bottom", defaultAttributes: memeTextAttributes)
     }
     
     
@@ -102,7 +110,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
     
     func keyboardWillShow(_ notification:Notification) {
         if bottom.isFirstResponder {
-            view.frame.origin.y -= getKeyboardHeight(notification)
+            view.frame.origin.y = -getKeyboardHeight(notification)
         }
     }
     
@@ -127,11 +135,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         return true
     }
     
+    // per reviewer sugggestion creating funtion to hide and show bars
+    func configureBars(hidden: Bool) {
+        toolBar.isHidden = hidden
+        navBar.isHidden = hidden
+    }
+    
     func generateMemedImage() -> UIImage {
         
         // TODO: Hide toolbar and navbar
-        toolBar.isHidden = true
-        navBar.isHidden = true
+        configureBars(hidden: true)
         
         // Render view to an image
         UIGraphicsBeginImageContext(self.view.frame.size)
@@ -140,8 +153,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         UIGraphicsEndImageContext()
         
         // TODO: Show toolbar and navbar
-        toolBar.isHidden = false
-        navBar.isHidden = false
+        configureBars(hidden: false)
         
         return memedImage
     }
@@ -157,6 +169,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIImagePickerContro
         
         let memedImage = generateMemedImage()
         let activityView = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        activityView.completionWithItemsHandler = {
+            (_, successful, _, _) in
+            
+            if successful{
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
         present(activityView, animated: true, completion: nil)
     }
     
