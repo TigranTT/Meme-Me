@@ -10,8 +10,8 @@ import Foundation
 import UIKit
 
 struct Meme {
-    var topText : NSString!
-    var bottomText : NSString!
-    var originalImage : UIImage!
-    var memeImage : UIImage!
+    let topText : NSString!
+    let bottomText : NSString!
+    let originalImage : UIImage!
+    let memeImage : UIImage!
 }
